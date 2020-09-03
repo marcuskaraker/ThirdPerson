@@ -26,6 +26,7 @@ namespace MK.ThirdPerson
 
         public float movementInputMultiplier = 1.2f;
         public bool useController = false;
+        public bool invertedCameraInput;
         [SerializeField] bool lockCursorToCenter;
 
         public InputKeys inputKeys;
@@ -122,8 +123,9 @@ namespace MK.ThirdPerson
 
         private void CameraInput(Vector3 movement)
         {
-            cameraController.RotateHorizontal(movement.x);
-            cameraController.RotateVertical(movement.y);
+            float inverted = invertedCameraInput ? -1 : 1;
+            cameraController.RotateHorizontal(movement.x * inverted);
+            cameraController.RotateVertical(movement.y * inverted);
         }
 
         private void ZoomUpdateController()

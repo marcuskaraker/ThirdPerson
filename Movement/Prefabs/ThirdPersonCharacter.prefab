@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3630258289603409773}
   - component: {fileID: 4323036252045320871}
   - component: {fileID: 337793156521289254}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ThirdPersonCharacter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,12 +47,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 7
+  rotationLerpSpeed: 20
   jumpForce: 16
   slopeSteepness: 0.75
+  artificialGravity: {x: 0, y: -30, z: 0}
   moveInAir: 1
   stuckCorrection: 0
   steepnessCorrection: 0
-  artificialGravity: {x: 0, y: -30, z: 0}
   groundMask:
     serializedVersion: 2
     m_Bits: 1

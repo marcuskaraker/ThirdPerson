@@ -38,7 +38,11 @@ namespace MK.ThirdPerson
         public bool limitPitchRotation = true;
         public MinMax minMaxPitchAngle = new MinMax(-20f, 30f);
         public MinMax minMaxZoomLimit = new MinMax(-20, 10);
-        
+
+        [Header("Obstacle Detection")]
+        public float castRadius = 1f;
+        public LayerMask obstacleMask;
+
         [System.NonSerialized] public Vector3 offset;
         [System.NonSerialized] public Camera mainCamera;
 
@@ -46,6 +50,7 @@ namespace MK.ThirdPerson
         private Quaternion targetMainRotation;
         private Quaternion targetPitchRotation;
 
+        private float finalZoomValue;
         private float deltaPitchAngle;
 
         /// <summary>
@@ -81,14 +86,48 @@ namespace MK.ThirdPerson
             // Rotation
             transform.rotation = Quaternion.Lerp(transform.rotation, targetMainRotation, Time.deltaTime * rotationLerpSpeed);
             pitcher.localRotation = Quaternion.Lerp(pitcher.localRotation, targetPitchRotation, Time.deltaTime * rotationLerpSpeed);
-            
+           
+            // Obstaclecast
+            RaycastHit hit;
+            Vector3 origin = cameraTarget.position;
+            Vector3 targetToCameraDir = (zoomerParent.position - cameraTarget.position).normalized;
+
+            float distanceToTarget = Vector3.Distance(mainCamera.transform.position, origin);
+            float distanceToOriginalZoomPos = Vector3.Distance(zoomerParent.position, origin);
+            bool didHit = Physics.Raycast
+            (
+                origin,
+                targetToCameraDir,
+                out hit,
+                distanceToTarget, 
+                obstacleMask
+            );
+
+            if (didHit)
+            {
+                Debug.Log(hit.transform.gameObject.name);
+                finalZoomValue = distanceToOriginalZoomPos - hit.distance;
+                Debug.Log("distanceToTarget (" + distanceToOriginalZoomPos + ") - hit.distance (" + hit.distance + ") = " + finalZoomValue);
+
+                if (ZoomValue > finalZoomValue)
+                {
+                    finalZoomValue += ZoomValue;
+                }
+            }
+            else
+            {
+                Debug.Log("<b>No Hit</b>");
+                finalZoomValue = zoomValue;
+            }
+
             // Zoom
             zoomer.transform.localPosition = new Vector3
             (
                 0,
                 0,
-                Mathf.Lerp(zoomer.transform.localPosition.z, zoomValue, Time.deltaTime * zoomSpeed)
+                didHit ? finalZoomValue : Mathf.Lerp(zoomer.transform.localPosition.z, finalZoomValue, Time.deltaTime * zoomSpeed)
             );
+
         }
 
         /// <summary>

@@ -117,8 +117,8 @@ MonoBehaviour:
   positionLerpSpeed: 20
   limitPitchRotation: 1
   minMaxPitchAngle:
-    min: -20
-    max: 30
+    min: -40
+    max: 40
   minMaxZoomLimit:
     min: -20
     max: 10

@@ -46,10 +46,13 @@ MonoBehaviour:
   target: {fileID: 0}
   cameraController: {fileID: 0}
   movementInputMultiplier: 1.2
-  useController: 1
+  useController: 0
+  lockCursorToCenter: 1
   inputKeys:
     horizontalInputID: Horizontal
     verticalInputID: Vertical
+    horizontalCameraInputID: Mouse X
+    verticalCameraInputID: Mouse Y
     jumpInputID: Jump
     interactInputID: Fire1
     zoomInInputID: Fire2
