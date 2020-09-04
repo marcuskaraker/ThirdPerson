@@ -322,14 +322,6 @@ PrefabInstance:
       propertyPath: target
       value: 
       objectReference: {fileID: 79675270}
-    - target: {fileID: 8947054772748053037, guid: 57c70ff15ee25eb408497375a3f74a6c, type: 3}
-      propertyPath: rotationSpeed
-      value: 1500
-      objectReference: {fileID: 0}
-    - target: {fileID: 8947054772748053037, guid: 57c70ff15ee25eb408497375a3f74a6c, type: 3}
-      propertyPath: obstacleMask.m_Bits
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8947054772748053038, guid: 57c70ff15ee25eb408497375a3f74a6c, type: 3}
       propertyPath: m_Name
       value: ThirdPersonCamera

@@ -48,16 +48,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 7
   rotationLerpSpeed: 20
-  jumpForce: 16
+  jumpForce: 14
   slopeSteepness: 0.75
-  artificialGravity: {x: 0, y: -30, z: 0}
+  artificialGravity: {x: 0, y: -40, z: 0}
   moveInAir: 1
   stuckCorrection: 0
   steepnessCorrection: 0
   groundMask:
     serializedVersion: 2
     m_Bits: 1
-  groundCheckDist: 2
+  groundCheckDist: 1
   isSwimming: 0
 --- !u!136 &4323036252045320871
 CapsuleCollider:
@@ -196,6 +196,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -220,6 +221,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &4323036252991826908
 GameObject:
   m_ObjectHideFlags: 0
@@ -275,6 +277,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -299,3 +302,4 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}

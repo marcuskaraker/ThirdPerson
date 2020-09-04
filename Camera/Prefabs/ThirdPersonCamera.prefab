@@ -112,7 +112,7 @@ MonoBehaviour:
   zoomer: {fileID: 1057868003304098596}
   zoomValue: 0
   zoomSpeed: 10
-  rotationSpeed: 70
+  rotationSpeed: 1500
   rotationLerpSpeed: 10
   positionLerpSpeed: 20
   limitPitchRotation: 1
@@ -123,6 +123,7 @@ MonoBehaviour:
     min: -20
     max: 10
   maxObstacleCorrectionZoom: 15
+  doObstacleCorrection: 1
   obstacleCastRadius: 0.5
   obstacleMask:
     serializedVersion: 2

@@ -41,7 +41,8 @@ namespace MK.ThirdPerson
         public float maxObstacleCorrectionZoom = 15;
 
         [Header("Obstacle Detection")]
-        public float obstacleCastRadius = 0.5f;
+        public bool doObstacleCorrection;
+        public float obstacleCastRadius = 0.75f;
         public LayerMask obstacleMask;
 
         [System.NonSerialized] public Vector3 offset;
@@ -65,7 +66,15 @@ namespace MK.ThirdPerson
         public float ZoomValue
         {
             get { return zoomValue; }
-            set { zoomValue = Mathf.Clamp(value, minMaxZoomLimit.min, minMaxZoomLimit.max); }
+            set
+            {
+                if (value < zoomValue && obstacleCorrectedThisFrame)
+                {
+                    return;
+                }
+
+                zoomValue = Mathf.Clamp(value, minMaxZoomLimit.min, minMaxZoomLimit.max); 
+            }
         }
 
         private void Awake()
@@ -91,65 +100,16 @@ namespace MK.ThirdPerson
             // Rotation
             transform.rotation = Quaternion.Lerp(transform.rotation, targetMainRotation, Time.deltaTime * rotationLerpSpeed);
             pitcher.localRotation = Quaternion.Lerp(pitcher.localRotation, targetPitchRotation, Time.deltaTime * rotationLerpSpeed);
-           
+
             // Obstacle Correction
-            RaycastHit hit;
-            Vector3 origin = cameraTarget.position;
-            Vector3 targetToCameraDir = (zoomerParent.position - cameraTarget.position).normalized;
-
-            float distanceToCamera = Vector3.Distance(mainCamera.transform.position, origin);
-            float distanceToOriginalZoomPos = Vector3.Distance(zoomerParent.position, origin);
-
-            bool didHit = Physics.SphereCast
-            (
-                origin,
-                obstacleCastRadius,
-                targetToCameraDir,
-                out hit,
-                distanceToOriginalZoomPos, 
-                obstacleMask
-            );
-
-            RaycastHit inverseHit;
-            inverseWallCheck = Physics.SphereCast
-            (
-                zoomerParent.position,
-                obstacleCastRadius,
-                -targetToCameraDir,
-                out inverseHit,
-                distanceToOriginalZoomPos-2f,
-                obstacleMask
-            );
-
-            if (didHit)
-            {
-                obstacleCorrectedThisFrame = true;
-                Debug.Log(hit.transform.gameObject.name);
-                finalZoomValue = distanceToOriginalZoomPos - hit.distance;
-
-                if (ZoomValue > finalZoomValue)
-                {
-                    finalZoomValue = ZoomValue;
-                    obstacleCorrectedThisFrame = false;
-                }
-            }
-            else if (inverseWallCheck)
-            {
-                RotateHorizontal(-Mathf.Sign(latestHorizontalInput));
-            }
-            else
-            {
-                finalZoomValue = zoomValue;
-            }
-
-            finalZoomValue = Mathf.Clamp(finalZoomValue, minMaxZoomLimit.min, maxObstacleCorrectionZoom);
+            bool didHitObstacle = CalculateObstacleCorrectionZoomValue();
 
             // Zoom
             zoomer.transform.localPosition = new Vector3
             (
                 0,
                 0,
-                didHit ? finalZoomValue : Mathf.Lerp(zoomer.transform.localPosition.z, finalZoomValue, Time.deltaTime * zoomSpeed)
+                didHitObstacle ? finalZoomValue : Mathf.Lerp(zoomer.transform.localPosition.z, finalZoomValue, Time.deltaTime * zoomSpeed)
             );
 
         }
@@ -184,6 +144,68 @@ namespace MK.ThirdPerson
                 deltaPitchAngle = newDeltaAngle;
                 targetPitchRotation *= Quaternion.AngleAxis(angle, Vector3.right);
             }
+        }
+
+        private bool CalculateObstacleCorrectionZoomValue()
+        {
+            obstacleCorrectedThisFrame = false;
+
+            if (!doObstacleCorrection)
+            {
+                return false;
+            }
+
+            RaycastHit hit;
+            Vector3 origin = cameraTarget.position;
+            Vector3 targetToCameraDir = (zoomerParent.position - cameraTarget.position).normalized;
+
+            float distanceToCamera = Vector3.Distance(mainCamera.transform.position, origin);
+            float distanceToOriginalZoomPos = Vector3.Distance(zoomerParent.position, origin);
+
+            bool didHit = Physics.SphereCast
+            (
+                origin,
+                obstacleCastRadius,
+                targetToCameraDir,
+                out hit,
+                distanceToOriginalZoomPos,
+                obstacleMask
+            );
+
+            RaycastHit inverseHit;
+            inverseWallCheck = Physics.SphereCast
+            (
+                zoomerParent.position,
+                obstacleCastRadius,
+                -targetToCameraDir,
+                out inverseHit,
+                distanceToOriginalZoomPos - (obstacleCastRadius + 0.1f),
+                obstacleMask
+            );
+
+            if (didHit)
+            {
+                obstacleCorrectedThisFrame = true;
+                finalZoomValue = distanceToOriginalZoomPos - hit.distance;
+
+                if (ZoomValue > finalZoomValue)
+                {
+                    finalZoomValue = ZoomValue;
+                    obstacleCorrectedThisFrame = false;
+                }
+            }
+            else if (inverseWallCheck)
+            {
+                RotateHorizontal(-Mathf.Sign(latestHorizontalInput));
+            }
+            else
+            {
+                finalZoomValue = zoomValue;
+            }
+
+            finalZoomValue = Mathf.Clamp(finalZoomValue, minMaxZoomLimit.min, maxObstacleCorrectionZoom);
+
+            return didHit;
         }
     }
 }
