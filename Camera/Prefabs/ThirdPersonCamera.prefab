@@ -122,6 +122,11 @@ MonoBehaviour:
   minMaxZoomLimit:
     min: -20
     max: 10
+  maxObstacleCorrectionZoom: 15
+  obstacleCastRadius: 0.5
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!1 &8947054772888268652
 GameObject:
   m_ObjectHideFlags: 0

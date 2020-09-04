@@ -38,9 +38,10 @@ namespace MK.ThirdPerson
         public bool limitPitchRotation = true;
         public MinMax minMaxPitchAngle = new MinMax(-20f, 30f);
         public MinMax minMaxZoomLimit = new MinMax(-20, 10);
+        public float maxObstacleCorrectionZoom = 15;
 
         [Header("Obstacle Detection")]
-        public float castRadius = 1f;
+        public float obstacleCastRadius = 0.5f;
         public LayerMask obstacleMask;
 
         [System.NonSerialized] public Vector3 offset;
@@ -52,6 +53,10 @@ namespace MK.ThirdPerson
 
         private float finalZoomValue;
         private float deltaPitchAngle;
+
+        private bool inverseWallCheck;
+        private float latestHorizontalInput;
+        private bool obstacleCorrectedThisFrame;
 
         /// <summary>
         /// Sets the zoom value and clamps it to the defined zoom limit.
@@ -87,38 +92,57 @@ namespace MK.ThirdPerson
             transform.rotation = Quaternion.Lerp(transform.rotation, targetMainRotation, Time.deltaTime * rotationLerpSpeed);
             pitcher.localRotation = Quaternion.Lerp(pitcher.localRotation, targetPitchRotation, Time.deltaTime * rotationLerpSpeed);
            
-            // Obstaclecast
+            // Obstacle Correction
             RaycastHit hit;
             Vector3 origin = cameraTarget.position;
             Vector3 targetToCameraDir = (zoomerParent.position - cameraTarget.position).normalized;
 
-            float distanceToTarget = Vector3.Distance(mainCamera.transform.position, origin);
+            float distanceToCamera = Vector3.Distance(mainCamera.transform.position, origin);
             float distanceToOriginalZoomPos = Vector3.Distance(zoomerParent.position, origin);
-            bool didHit = Physics.Raycast
+
+            bool didHit = Physics.SphereCast
             (
                 origin,
+                obstacleCastRadius,
                 targetToCameraDir,
                 out hit,
-                distanceToTarget, 
+                distanceToOriginalZoomPos, 
+                obstacleMask
+            );
+
+            RaycastHit inverseHit;
+            inverseWallCheck = Physics.SphereCast
+            (
+                zoomerParent.position,
+                obstacleCastRadius,
+                -targetToCameraDir,
+                out inverseHit,
+                distanceToOriginalZoomPos-2f,
                 obstacleMask
             );
 
             if (didHit)
             {
+                obstacleCorrectedThisFrame = true;
                 Debug.Log(hit.transform.gameObject.name);
                 finalZoomValue = distanceToOriginalZoomPos - hit.distance;
-                Debug.Log("distanceToTarget (" + distanceToOriginalZoomPos + ") - hit.distance (" + hit.distance + ") = " + finalZoomValue);
 
                 if (ZoomValue > finalZoomValue)
                 {
-                    finalZoomValue += ZoomValue;
+                    finalZoomValue = ZoomValue;
+                    obstacleCorrectedThisFrame = false;
                 }
+            }
+            else if (inverseWallCheck)
+            {
+                RotateHorizontal(-Mathf.Sign(latestHorizontalInput));
             }
             else
             {
-                Debug.Log("<b>No Hit</b>");
                 finalZoomValue = zoomValue;
             }
+
+            finalZoomValue = Mathf.Clamp(finalZoomValue, minMaxZoomLimit.min, maxObstacleCorrectionZoom);
 
             // Zoom
             zoomer.transform.localPosition = new Vector3
@@ -137,6 +161,11 @@ namespace MK.ThirdPerson
         /// <param name="value">An input value between -1 and 1.</param>
         public void RotateHorizontal(float value)
         {
+            if (value != 0 && !inverseWallCheck)
+            {
+                latestHorizontalInput = value;
+            }
+           
             targetMainRotation *= Quaternion.AngleAxis(value * rotationSpeed * Time.deltaTime, Vector3.up);
         }
 

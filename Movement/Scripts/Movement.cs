@@ -140,15 +140,16 @@ namespace MK.ThirdPerson
             rb.velocity += lastHitSteepNormal;
 
             // Rotation
+            Vector3 forwardDirection = rb.velocity.normalized;
+            forwardDirection.y = 0f;
+            Quaternion targetRotation = Quaternion.LookRotation(forwardDirection, Vector3.up);
             if (Vector3.Angle(transform.forward, rb.velocity.normalized) < 180)
-            {
-                transform.forward = Vector3.Lerp(transform.forward, rb.velocity.normalized, Time.deltaTime * rotationLerpSpeed);
-                transform.forward = new Vector3(transform.forward.x, 0, transform.forward.z);
+            {            
+                rb.rotation = Quaternion.Lerp(rb.rotation, targetRotation, Time.deltaTime * rotationLerpSpeed);
             }
             else
             {
-                transform.forward = rb.velocity.normalized;
-                transform.forward = new Vector3(transform.forward.x, 0, transform.forward.z);
+                rb.rotation = targetRotation;
             }
         }
 
