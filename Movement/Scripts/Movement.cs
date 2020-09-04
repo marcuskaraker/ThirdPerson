@@ -48,6 +48,11 @@ namespace MK.ThirdPerson
         private const float STUCK_CORRECTION_DISTANCE = 0.001f;
         private const float STUCK_CORRECTION_SPEED = 0.5f;
 
+        private const string ANIM_MOVEMENT_ID = "Movement";
+        private const string ANIM_IS_GROUNDED_ID = "IsGrounded";
+        private const string ANIM_IS_SWIMMING_ID = "IsSwimming";
+        private const string ANIM_JUMP_ID = "Jump";
+
         /// <summary>
         /// The movement freeze flag. Above zero if frozen.
         /// </summary>
@@ -104,12 +109,12 @@ namespace MK.ThirdPerson
             }
 
             // Jump
-            animator?.SetBool("IsGrounded", groundCheckResult != GroundCheckResult.InAir);
+            animator?.SetBool(ANIM_IS_GROUNDED_ID, groundCheckResult != GroundCheckResult.InAir);
 
             if (jump && groundCheckResult == GroundCheckResult.OnGround)
             {
                 rb.velocity = new Vector3(rb.velocity.x, jumpForce, rb.velocity.z);
-                animator?.SetTrigger("Jump");
+                animator?.SetTrigger(ANIM_JUMP_ID);
                 jump = false;
             }
             else
@@ -170,8 +175,8 @@ namespace MK.ThirdPerson
             // Animator
             if (animator)
             {
-                animator.SetFloat("Movement", movement.magnitude);
-                animator.SetBool("IsSwimming", isSwimming);
+                animator.SetFloat(ANIM_MOVEMENT_ID, movement.magnitude);
+                animator.SetBool(ANIM_IS_SWIMMING_ID, isSwimming);
             }
         }
 
